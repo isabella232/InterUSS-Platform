@@ -1,12 +1,58 @@
-- task: Docker@2
-  inputs:
-    containerRegistry: 'airmapreg'
-    repository: 'dss.httpgateway'
-    command: 'buildAndPush'
-    Dockerfile: 'cmds/http-gatewat/Dockerfile'
-- task: Docker@2
-  inputs:
-    containerRegistry: 'airmapreg'
-    repository: 'dss.grpcbackend'
-    command: 'buildAndPush'
-    Dockerfile: 'cmds/grpc-backend/Dockerfile'
+name: "build-n-push"
+trigger:
+  branches:
+    include:
+      - "feature/rewrite"
+      - "master"
+
+jobs:
+  - job: "docker1"
+    strategy:
+      parallel: 1
+    pool:
+      vmImage: "ubuntu-16.04"
+    steps:
+      - checkout: self
+        clean: true
+        lfs: true
+        submodules: recursive
+        persistCredentials: true
+      - task: Docker@2
+        displayName: Login to ACR
+        inputs:
+          command: login
+          containerRegistry: airmapreg
+      - task: Docker@2
+        displayName: Build grpc backend
+        inputs:
+          containerRegistry: 'airmapreg'
+          repository: 'dss.grpcbackend'
+          command: 'buildAndPush'
+          Dockerfile: 'cmds/grpc-backend/Dockerfile'
+          tags: |
+            $(Build.SourceVersion)
+  - job: "docker2"
+      strategy:
+        parallel: 1
+      pool:
+        vmImage: "ubuntu-16.04"
+      steps:
+        - checkout: self
+          clean: true
+          lfs: true
+          submodules: recursive
+          persistCredentials: true
+        - task: Docker@2
+          displayName: Login to ACR
+          inputs:
+            command: login
+            containerRegistry: airmapreg
+        - task: Docker@2
+          displayName: Build http gateway
+          inputs:
+            containerRegistry: 'airmapreg'
+            repository: 'dss.httpgateway'
+            command: 'buildAndPush'
+            Dockerfile: 'cmds/http-gateway/Dockerfile'
+            tags: |
+              $(Build.SourceVersion)
