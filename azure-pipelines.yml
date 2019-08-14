@@ -29,6 +29,7 @@ jobs:
           repository: 'dss.grpcbackend'
           command: 'buildAndPush'
           Dockerfile: 'cmds/grpc-backend/Dockerfile'
+          buildContext: '.'
           tags: |
             $(Build.SourceVersion)
   - job: "docker2"
@@ -54,5 +55,6 @@ jobs:
             repository: 'dss.httpgateway'
             command: 'buildAndPush'
             Dockerfile: 'cmds/http-gateway/Dockerfile'
+            buildContext: '.'
             tags: |
               $(Build.SourceVersion)
