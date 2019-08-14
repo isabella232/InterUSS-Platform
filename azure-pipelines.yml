@@ -32,10 +32,10 @@ jobs:
           tags: |
             $(Build.SourceVersion)
   - job: "docker2"
-      strategy:
-        parallel: 1
-      pool:
-        vmImage: "ubuntu-16.04"
+    strategy:
+      parallel: 1
+    pool:
+      vmImage: "ubuntu-16.04"
       steps:
         - checkout: self
           clean: true
