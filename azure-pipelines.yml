@@ -17,12 +17,12 @@ jobs:
         lfs: true
         submodules: recursive
         persistCredentials: true
-      - task: Docker@2
+      - task: Docker@1
         displayName: Login to ACR
         inputs:
           command: login
           containerRegistry: airmapreg
-      - task: Docker@2
+      - task: Docker@1
         displayName: Build grpc backend
         inputs:
           containerRegistry: 'airmapreg'
