@@ -1,23 +1,46 @@
-pool:
-  vmImage: 'ubuntu-latest'
 
+name: "build-docker-containers"
 trigger:
-- master
-- feature/rewrite
-
-- task: Docker@2
-  inputs:
-    containerRegistry: 'airmapreg'
-    repository: 'dss.grpcbackend'
-    command: 'buildAndPush'
-    Dockerfile: 'cmds/grpc-backend/Dockerfile'
-    tags: '$(Build.SourceVersion)'
-
-- task: Docker@2
-  inputs:
-    containerRegistry: 'airmapreg'
-    repository: 'dss.httpgateway'
-    command: 'buildAndPush'
-    Dockerfile: 'cmds/http-gateway/Dockerfile'
-    tags: '$(Build.SourceVersion)'
-
+  branches:
+    include:
+      - "master"
+      - "feature/rewrite"
+jobs:
+  - job: "docker1"
+    strategy:
+      parallel: 1
+    pool:
+      vmImage: "ubuntu-16.04"
+    steps:
+      - checkout: self
+        clean: true
+        lfs: true
+        submodules: recursive
+        persistCredentials: true
+      - task: Docker@1
+        inputs:
+          containerRegistry: 'airmapreg'
+          repository: 'dss.grpcbackend'
+          command: 'buildAndPush'
+          Dockerfile: 'cmds/grpc-backend/Dockerfile'
+          tags: '$(Build.SourceVersion)'
+          buildContext: "."
+  - job: "docker2"
+    strategy:
+      parallel: 1
+    pool:
+      vmImage: "ubuntu-16.04"
+    steps:
+      - checkout: self
+        clean: true
+        lfs: true
+        submodules: recursive
+        persistCredentials: true
+      - task: Docker@2
+        inputs:
+          containerRegistry: 'airmapreg'
+          repository: 'dss.httpgateway'
+          command: 'buildAndPush'
+          Dockerfile: 'cmds/http-gateway/Dockerfile'
+          tags: '$(Build.SourceVersion)'
+          buildContext: "."
